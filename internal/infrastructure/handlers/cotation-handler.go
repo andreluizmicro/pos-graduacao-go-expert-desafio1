@@ -20,7 +20,7 @@ func NewCotationHandler(service *application.CotationService) *CotationHandler {
 func (handler *CotationHandler) CreateCotation(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	cotation, err := handler.service.Create()
+	dto, err := handler.service.Create()
 
 	if err != nil {
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -29,5 +29,5 @@ func (handler *CotationHandler) CreateCotation(w http.ResponseWriter, r *http.Re
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(cotation)
+	json.NewEncoder(w).Encode(dto)
 }
