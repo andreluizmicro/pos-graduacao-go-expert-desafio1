@@ -6,12 +6,12 @@ CREATE TABLE cotation (
 	code varchar(80), 
 	code_in varchar(80), 
 	name varchar(255), 
-	high decimal(10,2), 
-	low decimal(10,2), 
-	var_bid decimal(10,2), 
-	pct_change decimal(10,2), 
-	bid decimal(10,2), 
-	ask decimal(10,2), 
+	high decimal(8,4), 
+	low decimal(8,4), 
+	var_bid decimal(8,4), 
+	pct_change decimal(8,4), 
+	bid decimal(8,4), 
+	ask decimal(8,4), 
 	created_at timestamp, 
 	primary key (id)
 );

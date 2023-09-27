@@ -16,6 +16,10 @@ import (
 
 const ECONOMIA_AWESOME_API = "https://economia.awesomeapi.com.br"
 
+type JSONResponse struct {
+	USDBRL entity.Cotation `json:"USDBRL"`
+}
+
 type CotationRepository struct {
 	db *sql.DB
 }
@@ -27,7 +31,40 @@ func NewContationRepository(db *sql.DB) *CotationRepository {
 }
 
 func (repository *CotationRepository) Create() (*entity.Cotation, error) {
+	cotation, err := sendToCreateANewCotation()
+	if err != nil {
+		return nil, err
+	}
 
+	stmt, err := repository.db.Prepare("INSERT INTO cotation (id, code, code_in, name, high, low, var_bid, pct_change, bid, ask, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		return nil, err
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+	_, err = stmt.ExecContext(
+		ctx,
+		cotation.ID,
+		cotation.Code,
+		cotation.Codein,
+		cotation.Name,
+		cotation.High,
+		cotation.Low,
+		cotation.VarBid,
+		cotation.PctChange,
+		cotation.Bid,
+		cotation.Ask,
+		cotation.CreateDate,
+	)
+	if err != nil {
+		return nil, exceptions.ErrInternalServerError
+	}
+
+	return cotation, nil
+}
+
+func sendToCreateANewCotation() (*entity.Cotation, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
 
@@ -46,35 +83,12 @@ func (repository *CotationRepository) Create() (*entity.Cotation, error) {
 		return nil, err
 	}
 
-	var cotation *entity.Cotation
-	json.Unmarshal(data, &cotation)
+	return ToEntity(data), nil
+}
 
-	cotation.ID = id.New().ID()
-
-	stmt, err := repository.db.Prepare("INSERT INTO cotation (id, code, code_in, name, high, low, var_bid, pct_change, bid, ask, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-	if err != nil {
-		return nil, err
-	}
-
-	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Millisecond)
-	defer cancel()
-	_, err = stmt.ExecContext(
-		ctx,
-		cotation.ID,
-		cotation.USDBRL.Code,
-		cotation.USDBRL.Codein,
-		cotation.USDBRL.Name,
-		cotation.USDBRL.High,
-		cotation.USDBRL.Low,
-		cotation.USDBRL.VarBid,
-		cotation.USDBRL.PctChange,
-		cotation.USDBRL.Bid,
-		cotation.USDBRL.Ask,
-		cotation.USDBRL.CreateDate,
-	)
-	if err != nil {
-		return nil, exceptions.ErrInternalServerError
-	}
-
-	return cotation, nil
+func ToEntity(data []byte) *entity.Cotation {
+	var jsonResponse JSONResponse
+	json.Unmarshal(data, &jsonResponse)
+	jsonResponse.USDBRL.ID = id.New().ID()
+	return &jsonResponse.USDBRL
 }
