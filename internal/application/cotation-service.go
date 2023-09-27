@@ -1,7 +1,6 @@
 package application
 
 import (
-	"github.com/pos-graduacao-go-expert-desafio1/internal/domain/entity"
 	"github.com/pos-graduacao-go-expert-desafio1/internal/infrastructure/repository"
 )
 
@@ -15,6 +14,13 @@ func NewCotationService(repository *repository.CotationRepository) *CotationServ
 	}
 }
 
-func (service *CotationService) Create() (*entity.Cotation, error) {
-	return service.repository.Create()
+func (service *CotationService) Create() (*CotationOutputDTO, error) {
+	cotation, err := service.repository.Create()
+	if err != nil {
+		return &CotationOutputDTO{}, nil
+	}
+
+	return &CotationOutputDTO{
+		Bid: cotation.Bid,
+	}, nil
 }

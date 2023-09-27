@@ -1,5 +1,5 @@
 package application
 
 type CotationOutputDTO struct {
-	Bid float64 `json: "bid"`
+	Bid string `json: "bid"`
 }
