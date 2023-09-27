@@ -1,11 +1,13 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/pos-graduacao-go-expert-desafio1/internal/domain/entity"
 	"github.com/pos-graduacao-go-expert-desafio1/internal/domain/exceptions"
@@ -25,19 +27,27 @@ func NewContationRepository(db *sql.DB) *CotationRepository {
 }
 
 func (repository *CotationRepository) Create() (*entity.Cotation, error) {
-	req, err := http.Get(fmt.Sprintf("%s/json/last/USD-BRL", ECONOMIA_AWESOME_API))
+
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/json/last/USD-BRL", ECONOMIA_AWESOME_API), nil)
 	if err != nil {
 		return nil, exceptions.ErrServiceUnavailable
 	}
-	defer req.Body.Close()
 
-	res, err := ioutil.ReadAll(req.Body)
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	data, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	var cotation *entity.Cotation
-	json.Unmarshal(res, &cotation)
+	json.Unmarshal(data, &cotation)
 
 	cotation.ID = id.New().ID()
 
@@ -46,7 +56,10 @@ func (repository *CotationRepository) Create() (*entity.Cotation, error) {
 		return nil, err
 	}
 
-	_, err = stmt.Exec(
+	ctx, cancel = context.WithTimeout(context.Background(), 10*time.Millisecond)
+	defer cancel()
+	_, err = stmt.ExecContext(
+		ctx,
 		cotation.ID,
 		cotation.USDBRL.Code,
 		cotation.USDBRL.Codein,
@@ -60,7 +73,6 @@ func (repository *CotationRepository) Create() (*entity.Cotation, error) {
 		cotation.USDBRL.CreateDate,
 	)
 	if err != nil {
-		fmt.Println("dsadsadsada")
 		return nil, exceptions.ErrInternalServerError
 	}
 
