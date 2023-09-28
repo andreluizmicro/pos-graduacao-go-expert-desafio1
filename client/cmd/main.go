@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/pos-graduacao-go-expert-desafio1/client/internal/application"
 	"github.com/pos-graduacao-go-expert-desafio1/client/internal/infrastructure/repository"
 )
@@ -16,6 +14,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println("Cotação criada com sucesso!")
 }

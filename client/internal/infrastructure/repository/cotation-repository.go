@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -21,6 +21,13 @@ func NewCotationRepository() *CotationRepository {
 func (repository *CotationRepository) CreateCotation() (*entity.Cotation, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3000*time.Millisecond)
 	defer cancel()
+
+	select {
+	case <-time.After(200 * time.Millisecond):
+		log.Println("Cotação realizada com sucesso")
+	case <-ctx.Done():
+		log.Println("timeout")
+	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", "http://localhost:8080/cotacao", nil)
 	if err != nil {
@@ -40,8 +47,6 @@ func (repository *CotationRepository) CreateCotation() (*entity.Cotation, error)
 
 	var cotation entity.Cotation
 	json.Unmarshal(data, &cotation)
-
-	fmt.Println(cotation)
 
 	return &cotation, nil
 }
