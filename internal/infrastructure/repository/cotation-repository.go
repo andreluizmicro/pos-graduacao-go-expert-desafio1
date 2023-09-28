@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -42,6 +43,12 @@ func (repository *CotationRepository) Create() (*entity.Cotation, error) {
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	select {
+	case <-time.After(10 * time.Millisecond):
+		log.Println("Request DB finalizada")
+	case <-ctx.Done():
+		log.Println("Request db timeout")
+	}
 	defer cancel()
 	_, err = stmt.ExecContext(
 		ctx,
@@ -65,7 +72,7 @@ func (repository *CotationRepository) Create() (*entity.Cotation, error) {
 }
 
 func sendToCreateANewCotation() (*entity.Cotation, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	defer cancel()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/json/last/USD-BRL", ECONOMIA_AWESOME_API), nil)
