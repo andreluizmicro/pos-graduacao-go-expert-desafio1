@@ -44,7 +44,7 @@ func (repository *CotationRepository) Create() (*entity.Cotation, error) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
 	select {
-	case <-time.After(10 * time.Millisecond):
+	case <-time.After(5 * time.Millisecond):
 		log.Println("Request DB finalizada")
 	case <-ctx.Done():
 		log.Println("Request db timeout")
@@ -72,8 +72,15 @@ func (repository *CotationRepository) Create() (*entity.Cotation, error) {
 }
 
 func sendToCreateANewCotation() (*entity.Cotation, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
 	defer cancel()
+
+	select {
+	case <-time.After(100 * time.Millisecond):
+		log.Println("Request API finalizada")
+	case <-ctx.Done():
+		log.Println("Request db timeout")
+	}
 
 	req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/json/last/USD-BRL", ECONOMIA_AWESOME_API), nil)
 	if err != nil {
