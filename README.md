@@ -8,6 +8,28 @@ O diretório `client` contém a implementação do serviço client que faz uma r
 
 e projeto server está na raiz do desafio, a ideia de manter essa estrutura, foi para manter todo o código do desafio em um único repositório
 
+
+### Banco de dados
+
+Criar a tabela `cotation`
+
+```SQL
+CREATE TABLE cotation (
+	id varchar(255), 
+	code varchar(80), 
+	code_in varchar(80), 
+	name varchar(255), 
+	high decimal(8,4), 
+	low decimal(8,4), 
+	var_bid decimal(8,4), 
+	pct_change decimal(8,4), 
+	bid decimal(8,4), 
+	ask decimal(8,4), 
+	created_at timestamp, 
+	primary key (id)
+);
+```
+
 ### Rodando o server
 
 Para rodar o server basta rodar o comando abaixo ainda na raiz do diretório principal com isso temos um server rodando no http://localhost:8080
