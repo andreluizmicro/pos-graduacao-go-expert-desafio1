@@ -34,7 +34,7 @@ func (service *CotationService) Create() error {
 }
 
 func saveCotation(cotation *entity.Cotation) error {
-	file, err := os.Create("tmp/cotacao.txt")
+	file, err := os.Create("cotacao.txt")
 	if err != nil {
 		return err
 	}
